@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: ca-kb-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ca_knowledge_base}
+      POSTGRES_USER: ${POSTGRES_USER:-ca_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-KG@ssociates2024!}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ca_admin} -d ${POSTGRES_DB:-ca_knowledge_base}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: ca-kb-app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ca_admin}:${POSTGRES_PASSWORD:-KG@ssociates2024!}@db:5432/${POSTGRES_DB:-ca_knowledge_base}
+      SESSION_SECRET: ${SESSION_SECRET:-kg-associates-session-secret-change-this}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "3000:3000"
+
+  nginx:
+    image: nginx:alpine
+    container_name: ca-kb-nginx
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./public:/usr/share/nginx/html/static
+
+volumes:
+  pgdata:
+  uploads:

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CA Knowledge Base — Kanhaiya Gautam & Associates</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap');
+:root{--bg:#f4f1ea;--bg2:#ece8df;--card:#fff;--side:#1b2030;--text:#1a1a1a;--text2:#606060;--accent:#b8860b;--accentL:#d4a017;--accentBg:#fdf6e3;--border:#ddd8ce;--r:6px;
+--tSection:#2563eb;--tRule:#7c3aed;--tNotification:#dc2626;--tCaselaw:#059669;--tCircular:#8b5cf6;--tOther:#6b7280}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+button,select,input,textarea{font-family:inherit}
+
+/* LOGIN */
+.loginPage{position:fixed;inset:0;background:linear-gradient(135deg,#1b2030,#2a3150,#1b2030);display:flex;align-items:center;justify-content:center;z-index:500}
+.loginBox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:36px 40px;width:380px;text-align:center}
+.loginBox h1{font-family:'Crimson Pro',serif;font-size:22px;color:var(--accentL);margin-bottom:4px}
+.loginBox .firm{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px}
+.loginBox input{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);border-radius:var(--r);color:#fff;font-size:13px;outline:none;margin-bottom:10px}
+.loginBox input:focus{border-color:var(--accent)}
+.loginBox input::placeholder{color:rgba(255,255,255,.3)}
+.loginBox button{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.loginBox .err{color:#f87171;font-size:12px;min-height:18px;margin-top:8px}
+
+/* APP LAYOUT */
+.app{display:flex;height:100vh;display:none}
+.side{width:300px;min-width:300px;background:var(--side);display:flex;flex-direction:column;overflow:hidden}
+.sHead{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
+.sHead h1{font-family:'Crimson Pro',serif;font-size:16px;color:var(--accentL)}
+.sHead p{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.sHead .userBadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9px;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.sHead .userBadge.admin{background:var(--accent);color:#fff}
+.sHead .userBadge.viewer{background:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+.sSearch{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05)}
+.sSearch input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:8px 10px;color:#fff;font-size:12px;outline:none}
+.sSearch input:focus{border-color:var(--accent)}
+.sSearch input::placeholder{color:rgba(255,255,255,.3)}
+.sBody{flex:1;overflow-y:auto;padding:6px 0;font-size:12.5px}
+.sBody::-webkit-scrollbar{width:3px}
+.sBody::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px}
+.sItem{display:flex;align-items:center;padding:6px 14px 6px 18px;color:rgba(255,255,255,.6);cursor:pointer;transition:.12s;border-left:3px solid transparent}
+.sItem:hover{background:rgba(255,255,255,.05);color:#fff}
+.sItem.active{background:rgba(255,255,255,.08);color:#fff;border-left-color:var(--accent)}
+.sItem .dot{width:6px;height:6px;border-radius:50%;margin-right:8px;flex-shrink:0}
+.sItem span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sFoot{padding:10px 14px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:6px;flex-wrap:wrap}
+.sFoot button{flex:1;min-width:60px;padding:6px 4px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.6);border-radius:var(--r);font-size:10.5px;cursor:pointer}
+.sFoot button:hover{background:rgba(255,255,255,.05);color:#fff}
+.sFoot button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;padding:0 20px;height:48px;background:var(--card);border-bottom:1px solid var(--border);gap:10px}
+.topbar .bc{font-size:12px;color:var(--text2);flex:1}
+.topbar .bc span{cursor:pointer}.topbar .bc span:hover{color:var(--accent)}
+.topbar .bc .sep{margin:0 5px;color:#ccc}
+.searchBox{position:relative;width:280px}
+.searchBox input{width:100%;padding:7px 10px 7px 28px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;background:var(--bg);outline:none}
+.searchBox input:focus{border-color:var(--accent)}
+.searchBox::before{content:'🔍';position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px}
+.content{flex:1;overflow-y:auto;padding:24px 36px}
+.content::-webkit-scrollbar{width:5px}
+.content::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+
+/* ENTRY */
+.ev{max-width:900px;margin:0 auto}
+.evTag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.4px;margin-right:4px;margin-bottom:6px}
+.ev h2{font-family:'Crimson Pro',serif;font-size:22px;font-weight:700;margin-bottom:6px}
+.evMeta{font-size:11px;color:var(--text2);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.evBar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;border-bottom:1px solid var(--border);padding-bottom:12px}
+.evBar button{padding:5px 11px;border:1px solid var(--border);background:var(--card);border-radius:var(--r);font-size:11px;cursor:pointer;color:var(--text2)}
+.evBar button:hover{border-color:var(--accent);color:var(--accent)}
+.evSplit{display:flex;gap:16px}
+.evMainCol{flex:1;min-width:0}
+.evBody{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px 26px;font-family:'Crimson Pro',serif;font-size:15px;line-height:1.8;min-height:150px}
+.evBody h3{font-size:17px;margin:16px 0 8px;font-weight:700}
+.evBody table{width:100%;border-collapse:collapse;margin:10px 0;font-family:'Nunito Sans',sans-serif;font-size:12px}
+.evBody table th,.evBody table td{border:1px solid var(--border);padding:6px 10px}
+.evBody table th{background:var(--accentBg);font-weight:700}
+.evTimestamp{margin-top:14px;padding:10px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);font-size:11px;color:var(--text2);display:flex;gap:20px;flex-wrap:wrap}
+.evTimestamp .ts-l{font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.4px;margin-right:3px}
+.linkChip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:var(--bg);border:1px solid var(--border);border-radius:14px;font-size:11px;cursor:pointer;margin:0 5px 5px 0}
+.linkChip:hover{border-color:var(--accent);background:var(--accentBg)}
+
+/* NOTES */
+.evNotesCol{width:320px;min-width:280px;display:none;flex-direction:column}
+.notesPanel{background:var(--card);border:1px solid var(--accent);border-radius:var(--r);display:flex;flex-direction:column;height:100%}
+.notesPH{padding:10px 14px;background:var(--accentBg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;border-radius:var(--r) var(--r) 0 0}
+.notesPH h4{font-size:12px;font-weight:700;color:var(--accent)}
+.notesEd{flex:1;padding:12px;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.6;outline:none;min-height:200px;overflow-y:auto;border:none;resize:none;background:#fffef8}
+.notesFt{padding:8px 12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text2)}
+.notesFt button{padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:10px;cursor:pointer}
+
+/* HOME */
+.welcome{max-width:900px;margin:0 auto}
+.welcome h2{font-family:'Crimson Pro',serif;font-size:28px;text-align:center;margin-bottom:4px}
+.welcome .firm{text-align:center;color:var(--accent);font-weight:600;font-size:14px;margin-bottom:18px}
+.qStats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.qStat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.qStat .n{font-family:'Crimson Pro',serif;font-size:24px;font-weight:700;color:var(--accent)}
+.qStat .l{font-size:10px;color:var(--text2);margin-top:2px}
+.idxTable{width:100%;border-collapse:collapse;font-size:12px}
+.idxTable th,.idxTable td{border:1px solid var(--border);padding:6px 8px;text-align:left}
+.idxTable th{background:var(--accentBg);font-weight:700;font-size:10.5px;text-transform:uppercase}
+.idxTable tr:hover{background:var(--accentBg);cursor:pointer}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:none;align-items:flex-start;justify-content:center;padding-top:30px;overflow-y:auto}
+.modal-bg.vis{display:flex}
+.modal{background:var(--card);border-radius:10px;width:700px;max-width:95vw;margin-bottom:30px}
+.modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-hd h3{font-size:15px;font-weight:700}
+.modal-bd{padding:18px 20px}
+.modal-ft{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.modal-ft button{padding:8px 16px;border-radius:var(--r);font-size:12px;border:1px solid var(--border);background:transparent;cursor:pointer}
+.modal-ft button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:12px;outline:none}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent)}
+.fg textarea{min-height:200px;font-family:'Crimson Pro',serif;font-size:14px;line-height:1.6;resize:vertical}
+.fRow{display:flex;gap:10px}.fRow .fg{flex:1}
+
+/* TOAST */
+.toast{position:fixed;bottom:16px;right:16px;background:#1b2030;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:12px;z-index:300;transform:translateY(60px);opacity:0;transition:.3s}
+.toast.vis{transform:translateY(0);opacity:1}
+</style>
+</head>
+<body>
+
+<div class="loginPage" id="loginPage">
+  <div class="loginBox">
+    <div style="font-size:36px;margin-bottom:10px">⚖</div>
+    <h1>CA Knowledge Base</h1>
+    <div class="firm">Kanhaiya Gautam & Associates<br><span style="font-size:10px;opacity:.5">Chartered Accountants</span></div>
+    <input type="text" id="loginUser" placeholder="Username" autofocus>
+    <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Login</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <div class="side">
+    <div class="sHead">
+      <h1>⚖ CA Knowledge Base</h1>
+      <p>Kanhaiya Gautam & Associates</p>
+      <div id="userInfo"></div>
+    </div>
+    <div class="sSearch"><input type="text" id="sideFilter" placeholder="Filter entries…" oninput="loadSidebar()"></div>
+    <div class="sBody" id="sideBody"></div>
+    <div class="sFoot">
+      <button onclick="doExport()">⬇ Export</button>
+      <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      <button onclick="openSettings()">⚙</button>
+      <button class="pri" onclick="openNewModal()" id="btnNew" style="display:none">+ New</button>
+      <button onclick="doLogout()">🔒</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="bc" id="bc"><span onclick="showHome()">Home</span></div>
+      <div class="searchBox">
+        <input type="text" id="globalSearch" placeholder="Search everything…" oninput="doGlobalSearch()">
+      </div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="entryModal">
+  <div class="modal" style="width:720px">
+    <div class="modal-hd"><h3 id="emTitle">New Entry</h3><button onclick="closeEntryModal()" style="border:none;background:none;font-size:16px;cursor:pointer">✕</button></div>
+    <div class="modal-bd" id="emBody"></div>
+    <div class="modal-ft"><button onclick="closeEntryModal()">Cancel</button><button class="pri" onclick="saveEntry()" id="emSave">Save</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="settingsModal">
+  <div class="modal" style="width:580px">
+    <div class="modal-hd"><h3>⚙ Settings</h3><button onclick="closeSettings()" style="border:none;background:none;font-size:16px;cursor:pointer">✕</button></div>
+    <div class="modal-bd" id="settingsBody"></div>
+    <div class="modal-ft"><button onclick="closeSettings()">Close</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="doImport(event)">
+
+<script>
+let USER=null, SETTINGS={acts:[],types:[]};
+
+const TC={section:'#2563eb',rule:'#7c3aed',notification:'#dc2626',caselaw:'#059669',circular:'#8b5cf6','press release':'#f59e0b',article:'#6366f1',schedule:'#4f46e5',amendment:'#ea580c',other:'#6b7280'};
+function tColor(t){return TC[t]||'#6b7280'}
+function tLabel(t){const m={section:'Sec.',rule:'Rule',notification:'Notfn',circular:'Circ',caselaw:'Case',schedule:'Sch',amendment:'Amd'};return m[t]||t}
+
+// ═══ API HELPERS ═══
+async function api(url,opts={}){
+  const r=await fetch(url,{headers:{'Content-Type':'application/json'},...opts,body:opts.body?JSON.stringify(opts.body):undefined});
+  return r.json();
+}
+
+// ═══ AUTH ═══
+async function checkAuth(){
+  const r=await api('/api/me');
+  if(r.user){USER=r.user;showApp()}
+  else showLogin();
+}
+function showLogin(){document.getElementById('loginPage').style.display='flex';document.getElementById('app').style.display='none'}
+function showApp(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('userInfo').innerHTML=`<span class="userBadge ${USER.role}">${USER.username} (${USER.role})</span>`;
+  if(USER.role==='admin')document.getElementById('btnNew').style.display='';
+  loadSettings().then(()=>{loadSidebar();showHome()});
+}
+async function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!p){document.getElementById('loginErr').textContent='Enter username and password';return}
+  const r=await api('/api/login',{method:'POST',body:{username:u,password:p}});
+  if(r.error){document.getElementById('loginErr').textContent=r.error}
+  else{USER=r.user;showApp()}
+}
+async function doLogout(){await api('/api/logout',{method:'POST'});USER=null;showLogin()}
+
+// ═══ SETTINGS ═══
+async function loadSettings(){SETTINGS=await api('/api/settings')}
+
+// ═══ SIDEBAR ═══
+async function loadSidebar(){
+  const filter=document.getElementById('sideFilter').value.trim();
+  const params=filter?`?search=${encodeURIComponent(filter)}`:'';
+  const entries=await api('/api/entries'+params+'&limit=500');
+  const body=document.getElementById('sideBody');
+  // Group by act
+  const groups={};
+  entries.forEach(e=>{if(!groups[e.act])groups[e.act]=[];groups[e.act].push(e)});
+  let h='';
+  for(const[act,items]of Object.entries(groups)){
+    h+=`<div style="padding:6px 14px 3px;font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;font-weight:700">${act} (${items.length})</div>`;
+    items.slice(0,50).forEach(e=>{
+      h+=`<div class="sItem" onclick="goTo('${e.id}')"><span class="dot" style="background:${tColor(e.type)}"></span><span>${tLabel(e.type)} ${e.number} — ${(e.title||'').substring(0,38)}</span></div>`;
+    });
+    if(items.length>50)h+=`<div style="padding:4px 14px 8px 30px;font-size:10px;color:rgba(255,255,255,.25)">+${items.length-50} more…</div>`;
+  }
+  body.innerHTML=h||'<div style="padding:20px;text-align:center;color:rgba(255,255,255,.2);font-size:12px">No entries</div>';
+}
+
+// ═══ NAVIGATION ═══
+async function goTo(id){
+  const e=await api('/api/entries/'+id);
+  if(e.error){toast('Not found');return}
+  renderEntry(e);
+}
+
+async function renderEntry(e){
+  document.getElementById('bc').innerHTML=`<span onclick="showHome()">Home</span><span class="sep">›</span><span onclick="filterByAct('${e.act}')">${e.act}</span><span class="sep">›</span><span>${tLabel(e.type)} ${e.number}</span>`;
+  
+  // Cross refs
+  let outH='';
+  for(const lid of (e.links||[])){
+    const le=await api('/api/entries/'+lid).catch(()=>null);
+    if(le&&!le.error)outH+=`<span class="linkChip" onclick="goTo('${lid}')"><span class="dot" style="background:${tColor(le.type)};width:6px;height:6px;border-radius:50%"></span>${tLabel(le.type)} ${le.number} — ${(le.title||'').substring(0,30)}</span>`;
+    else outH+=`<span class="linkChip">${lid}</span>`;
+  }
+
+  const isAdmin=USER&&USER.role==='admin';
+  const fmtD=iso=>iso?new Date(iso).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
+  
+  let adminBtns='';
+  if(isAdmin){
+    adminBtns=`<button onclick="openEditModal('${e.id}')">✏️ Edit</button>
+      <button onclick="dupEntry('${e.id}')">📋 Duplicate</button>
+      <button onclick="delEntry('${e.id}')" style="color:#c00">🗑 Delete</button>`;
+  }
+
+  document.getElementById('content').innerHTML=`<div class="ev">
+    <div><span class="evTag" style="background:${tColor(e.type)}">${e.type}</span><span class="evTag" style="background:#555">${e.act}</span>${e.chapter?`<span class="evTag" style="background:#888">${e.chapter}</span>`:''}</div>
+    <h2>${tLabel(e.type)} ${e.number} — ${e.title}</h2>
+    <div class="evMeta"><span style="font-style:italic">${e.sub||''}</span><span style="font-family:monospace;font-size:10px;background:var(--bg2);padding:2px 6px;border-radius:3px">ID: ${e.id}</span>${e.tags&&e.tags.length?`<span>Tags: ${e.tags.join(', ')}</span>`:''}</div>
+    <div class="evBar">
+      <button onclick="toggleNotesPanel('${e.id}')">📝 My Notes</button>
+      ${adminBtns}
+      <button onclick="window.print()">🖨️ Print</button>
+    </div>
+    <div class="evSplit">
+      <div class="evMainCol">
+        <div class="evBody">${e.content||'<em>No content yet.</em>'}</div>
+      </div>
+      <div class="evNotesCol" id="notesCol">
+        <div class="notesPanel">
+          <div class="notesPH"><h4>📝 My Notes</h4><span id="notesSaved" style="font-size:10px;color:var(--text2)"></span></div>
+          <textarea class="notesEd" id="notesEditor" placeholder="Write your understanding, practical notes, key takeaways…"></textarea>
+          <div class="notesFt"><span id="notesWC">0 words</span><button onclick="saveNotes('${e.id}')">💾 Save</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="evTimestamp">
+      <span><span class="ts-l">Created:</span> ${fmtD(e.created_at)}</span>
+      <span><span class="ts-l">Updated:</span> ${fmtD(e.updated_at)}</span>
+      <span style="margin-left:auto;font-size:9px;opacity:.5">Kanhaiya Gautam & Associates</span>
+    </div>
+    ${outH?`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)"><h4 style="font-size:12px;color:var(--text2);margin-bottom:8px">🔗 Cross-References</h4>${outH}</div>`:''}
+  </div>`;
+
+  // Load notes
+  loadNotes(e.id);
+}
+
+// ═══ NOTES ═══
+async function loadNotes(entryId){
+  const r=await api('/api/notes/'+entryId);
+  const ed=document.getElementById('notesEditor');
+  if(ed){
+    ed.value=r.content||'';
+    updateNWC();
+    if(r.updated_at)document.getElementById('notesSaved').textContent='Saved '+new Date(r.updated_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});
+    if(r.content)document.getElementById('notesCol').style.display='flex';
+  }
+}
+async function saveNotes(entryId){
+  const ed=document.getElementById('notesEditor');
+  if(!ed)return;
+  await api('/api/notes/'+entryId,{method:'PUT',body:{content:ed.value}});
+  document.getElementById('notesSaved').textContent='Saved just now';
+  toast('Notes saved ✓');
+}
+function toggleNotesPanel(){
+  const col=document.getElementById('notesCol');
+  if(col)col.style.display=col.style.display==='flex'?'none':'flex';
+}
+function updateNWC(){
+  const ed=document.getElementById('notesEditor');
+  if(!ed)return;
+  const w=(ed.value||'').trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('notesWC').textContent=w+' word'+(w!==1?'s':'');
+}
+document.addEventListener('input',ev=>{if(ev.target&&ev.target.id==='notesEditor')updateNWC()});
+
+// ═══ HOME ═══
+async function showHome(){
+  document.getElementById('bc').innerHTML='<span onclick="showHome()">Home</span>';
+  const stats=await api('/api/stats');
+  const entries=await api('/api/entries?limit=100');
+  
+  let rows=entries.map(e=>`<tr onclick="goTo('${e.id}')"><td style="font-size:11px">${e.act}</td><td><span class="evTag" style="background:${tColor(e.type)};font-size:8px;padding:1px 5px">${e.type}</span></td><td style="font-weight:700">${e.number}</td><td>${e.title}</td><td style="color:var(--text2);font-size:11px">${e.sub||''}</td><td style="font-size:10px;color:var(--text2)">${e.updated_at?new Date(e.updated_at).toLocaleDateString('en-IN'):'—'}</td></tr>`).join('');
+
+  document.getElementById('content').innerHTML=`<div class="welcome">
+    <h2>⚖ CA Knowledge Base</h2>
+    <div class="firm">Kanhaiya Gautam & Associates</div>
+    <div class="qStats">
+      <div class="qStat"><div class="n">${stats.total}</div><div class="l">Total Entries</div></div>
+      <div class="qStat"><div class="n">${stats.acts.length}</div><div class="l">Acts / Laws</div></div>
+      <div class="qStat"><div class="n">${stats.types.find(t=>t.type==='section')?.count||0}</div><div class="l">Sections</div></div>
+      <div class="qStat"><div class="n">${stats.types.find(t=>t.type==='rule')?.count||0}</div><div class="l">Rules</div></div>
+    </div>
+    <h3 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:10px">Recent Entries <span style="font-weight:400;font-size:10px;color:#999">(last updated first)</span></h3>
+    <table class="idxTable"><thead><tr><th>Act</th><th>Type</th><th>No.</th><th>Title</th><th>Index Line</th><th>Updated</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+// ═══ SEARCH ═══
+async function doGlobalSearch(){
+  const q=document.getElementById('globalSearch').value.trim();
+  if(q.length<2){showHome();return}
+  const entries=await api('/api/entries?search='+encodeURIComponent(q)+'&limit=50');
+  let rows=entries.map(e=>`<tr onclick="goTo('${e.id}')"><td>${e.act}</td><td><span class="evTag" style="background:${tColor(e.type)};font-size:8px;padding:1px 5px">${e.type}</span></td><td style="font-weight:700">${e.number}</td><td>${e.title}</td><td style="color:var(--text2);font-size:11px">${e.sub||''}</td></tr>`).join('');
+  document.getElementById('content').innerHTML=`<div class="welcome"><h3 style="font-size:14px;margin-bottom:12px">Search results for "${q}" (${entries.length} found)</h3><table class="idxTable"><thead><tr><th>Act</th><th>Type</th><th>No.</th><th>Title</th><th>Index Line</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ═══ ENTRY MODAL ═══
+let editId=null;
+function openNewModal(){
+  editId=null;
+  document.getElementById('emTitle').textContent='New Entry';
+  document.getElementById('emSave').textContent='Save';
+  renderEntryForm({});
+  document.getElementById('entryModal').classList.add('vis');
+}
+async function openEditModal(id){
+  editId=id;
+  const e=await api('/api/entries/'+id);
+  document.getElementById('emTitle').textContent='Edit Entry';
+  document.getElementById('emSave').textContent='Update';
+  renderEntryForm(e);
+  document.getElementById('entryModal').classList.add('vis');
+}
+function closeEntryModal(){document.getElementById('entryModal').classList.remove('vis')}
+
+function renderEntryForm(e){
+  const actOpts=SETTINGS.acts.map(a=>`<option value="${a}" ${e.act===a?'selected':''}>${a}</option>`).join('');
+  const typeOpts=SETTINGS.types.map(t=>`<option value="${t}" ${e.type===t?'selected':''}>${t}</option>`).join('');
+  document.getElementById('emBody').innerHTML=`
+    <div class="fRow"><div class="fg"><label>Act / Law</label><select id="fAct">${actOpts}</select></div><div class="fg"><label>Type</label><select id="fType">${typeOpts}</select></div></div>
+    <div class="fRow"><div class="fg"><label>Chapter</label><input id="fChap" value="${e.chapter||''}"></div><div class="fg"><label>Number</label><input id="fNum" value="${e.number||''}"></div></div>
+    <div class="fg"><label>Title</label><input id="fTitle" value="${e.title||''}"></div>
+    <div class="fg"><label>Sub-heading / Index Line</label><input id="fSub" value="${e.sub||''}"></div>
+    <div class="fg"><label>Content (HTML supported — use &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;table&gt; or type normally)</label><textarea id="fContent">${e.content||''}</textarea></div>
+    <div class="fg"><label>Cross-references (comma-separated IDs)</label><input id="fLinks" value="${(e.links||[]).join(', ')}"></div>
+    <div class="fg"><label>Tags (comma-separated)</label><input id="fTags" value="${(e.tags||[]).join(', ')}"></div>`;
+}
+
+async function saveEntry(){
+  const body={
+    act:document.getElementById('fAct').value,
+    type:document.getElementById('fType').value,
+    chapter:document.getElementById('fChap').value.trim(),
+    number:document.getElementById('fNum').value.trim(),
+    title:document.getElementById('fTitle').value.trim(),
+    sub:document.getElementById('fSub').value.trim(),
+    content:document.getElementById('fContent').value,
+    links:document.getElementById('fLinks').value.split(',').map(s=>s.trim()).filter(Boolean),
+    tags:document.getElementById('fTags').value.split(',').map(s=>s.trim()).filter(Boolean)
+  };
+  if(!body.number||!body.title){toast('Number and Title required');return}
+  
+  if(editId){
+    await api('/api/entries/'+editId,{method:'PUT',body});
+    toast('Updated ✓');
+  }else{
+    const r=await api('/api/entries',{method:'POST',body});
+    if(r.error){toast(r.error);return}
+    editId=r.id;
+    toast('Created ✓');
+  }
+  closeEntryModal();loadSidebar();
+  if(editId)goTo(editId);else showHome();
+}
+
+async function dupEntry(id){
+  const e=await api('/api/entries/'+id);
+  e.id=undefined;e.title+=' (Copy)';e.number+='-copy';
+  const r=await api('/api/entries',{method:'POST',body:e});
+  if(r.ok){toast('Duplicated ✓');loadSidebar()}
+}
+async function delEntry(id){
+  if(!confirm('Delete permanently?'))return;
+  await api('/api/entries/'+id,{method:'DELETE'});
+  toast('Deleted ✓');loadSidebar();showHome();
+}
+function filterByAct(act){document.getElementById('sideFilter').value=act;loadSidebar()}
+
+// ═══ IMPORT / EXPORT ═══
+function doExport(){window.location='/api/export'}
+async function doImport(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const text=await file.text();
+  try{
+    const data=JSON.parse(text);
+    if(!data.entries){toast('Invalid file');return}
+    const mode=confirm('Merge with existing? (Cancel = Replace all)')?'merge':'replace';
+    const r=await api('/api/import',{method:'POST',body:{...data,mode}});
+    toast(`Imported ${r.imported} entries (${r.skipped} skipped) ✓`);
+    loadSidebar();showHome();
+  }catch(e){toast('Import error: '+e.message)}
+  ev.target.value='';
+}
+
+// ═══ SETTINGS ═══
+async function openSettings(){
+  await loadSettings();
+  const isAdmin=USER&&USER.role==='admin';
+  let usersHtml='';
+  if(isAdmin){
+    const users=await api('/api/users');
+    usersHtml=`<h4 style="font-size:12px;font-weight:700;margin-bottom:8px">👥 Users</h4>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px">
+        <tr style="background:var(--accentBg)"><th style="padding:5px 8px;border:1px solid var(--border)">Username</th><th style="padding:5px 8px;border:1px solid var(--border)">Role</th><th style="padding:5px 8px;border:1px solid var(--border)">Action</th></tr>
+        ${users.map(u=>`<tr><td style="padding:5px 8px;border:1px solid var(--border)">${u.username}</td><td style="padding:5px 8px;border:1px solid var(--border)">${u.role}</td><td style="padding:5px 8px;border:1px solid var(--border)">${u.id!==USER.id?`<button onclick="delUser(${u.id})" style="font-size:10px;border:none;background:#dc2626;color:#fff;padding:2px 8px;border-radius:3px;cursor:pointer">Remove</button>`:''}</td></tr>`).join('')}
+      </table>
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <input id="newUser" placeholder="Username" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+        <input id="newPass" placeholder="Password" type="password" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+        <select id="newRole" style="padding:6px;border:1px solid var(--border);border-radius:var(--r);font-size:12px"><option value="viewer">Viewer</option><option value="admin">Admin</option></select>
+        <button onclick="addUser()" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer">+ Add</button>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">`;
+  }
+  document.getElementById('settingsBody').innerHTML=usersHtml+`
+    <h4 style="font-size:12px;font-weight:700;margin-bottom:8px">🔒 Change My Password</h4>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <input id="chgPass" placeholder="New password" type="password" style="flex:1;padding:6px 8px;border:1px solid var(--border);border-radius:var(--r);font-size:12px">
+      <button onclick="chgPassword()" style="padding:6px 12px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:12px;cursor:pointer">Update</button>
+    </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+    <p style="font-size:11px;color:var(--text2)">Database backup: <button onclick="window.location='/api/backup'" style="padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">⬇ Download SQLite</button></p>`;
+  document.getElementById('settingsModal').classList.add('vis');
+}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('vis')}
+
+async function addUser(){
+  const u=document.getElementById('newUser').value.trim(),p=document.getElementById('newPass').value,r=document.getElementById('newRole').value;
+  if(!u||!p){toast('Fill username & password');return}
+  const res=await api('/api/users',{method:'POST',body:{username:u,password:p,role:r}});
+  if(res.error)toast(res.error);else{toast('User added ✓');openSettings()}
+}
+async function delUser(id){
+  if(!confirm('Remove this user?'))return;
+  await api('/api/users/'+id,{method:'DELETE'});
+  toast('Removed ✓');openSettings();
+}
+async function chgPassword(){
+  const p=document.getElementById('chgPass').value;
+  if(!p||p.length<3){toast('Min 3 characters');return}
+  await api('/api/users/'+USER.id+'/password',{method:'PUT',body:{password:p}});
+  toast('Password changed ✓');document.getElementById('chgPass').value='';
+}
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('vis');setTimeout(()=>t.classList.remove('vis'),2500)}
+
+// ═══ INIT ═══
+checkAuth();
+</script>
+</body>
+</html>
