@@ -3,13 +3,10 @@
 --  Kanhaiya Gautam & Associates
 -- ═══════════════════════════════════════════════════
 
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'viewer',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+-- Note: there is no local `users` table anymore. Identity and roles come
+-- from Clerk (the "KGA Staff" organization, via portal.internal.kgautam.in)
+-- — see src/middleware/auth.js. `notes.user_id` below stores Clerk's string
+-- user id (e.g. "user_xxx") directly rather than referencing a local table.
 
 CREATE TABLE IF NOT EXISTS entries (
     id VARCHAR(100) PRIMARY KEY,
@@ -30,7 +27,7 @@ CREATE TABLE IF NOT EXISTS entries (
 CREATE TABLE IF NOT EXISTS notes (
     id SERIAL PRIMARY KEY,
     entry_id VARCHAR(100) NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
-    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id VARCHAR(100) NOT NULL,
     content TEXT DEFAULT '',
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(entry_id, user_id)

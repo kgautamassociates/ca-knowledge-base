@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ca_knowledge_base}
       POSTGRES_USER: ${POSTGRES_USER:-ca_admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-KG@ssociates2024!}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./src/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
@@ -30,10 +30,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-ca_admin}:${POSTGRES_PASSWORD:-KG@ssociates2024!}@db:5432/${POSTGRES_DB:-ca_knowledge_base}
-      SESSION_SECRET: ${SESSION_SECRET:-kg-associates-session-secret-change-this}
-      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ca_admin}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in .env}@db:5432/${POSTGRES_DB:-ca_knowledge_base}
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:?CLERK_SECRET_KEY must be set in .env}
+      CLERK_PUBLISHABLE_KEY: ${CLERK_PUBLISHABLE_KEY:?CLERK_PUBLISHABLE_KEY must be set in .env}
+      CLERK_ORGANIZATION_ID: ${CLERK_ORGANIZATION_ID:?CLERK_ORGANIZATION_ID must be set in .env}
     volumes:
       - uploads:/app/uploads
     ports:

@@ -55,7 +55,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
       [entryId, act, type || 'section', chapter || '', number, title, sub || '',
        content || '', JSON.stringify(links || []), JSON.stringify(tags || []),
-       now, now, req.session.user.username]
+       now, now, req.auth.username]
     );
     res.json({ id: entryId, ok: true });
   } catch (e) {
@@ -70,7 +70,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
           [altId, req.body.act, req.body.type || 'section', req.body.chapter || '', req.body.number,
            req.body.title, req.body.sub || '', req.body.content || '',
            JSON.stringify(req.body.links || []), JSON.stringify(req.body.tags || []),
-           now, now, req.session.user.username]
+           now, now, req.auth.username]
         );
         res.json({ id: altId, ok: true });
       } catch (e2) {

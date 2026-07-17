@@ -4,11 +4,20 @@ const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
+// ═══ CURRENT USER ═══
+// The frontend has no login of its own (see public/index.html) — it arrives
+// with a Clerk token handed off from the hub and calls this once to learn
+// who it is / what role they have, same shape the old local-auth /api/me
+// used to return.
+router.get('/me', requireAuth, (req, res) => {
+  res.json({ user: { username: req.auth.username, role: req.auth.role } });
+});
+
 // ═══ NOTES ═══
 router.get('/notes/:entryId', requireAuth, async (req, res) => {
   const result = await db.query(
     'SELECT content, updated_at FROM notes WHERE entry_id = $1 AND user_id = $2',
-    [req.params.entryId, req.session.user.id]
+    [req.params.entryId, req.auth.id]
   );
   if (result.rows.length === 0) return res.json({ content: '', updated_at: null });
   res.json(result.rows[0]);
@@ -20,7 +29,7 @@ router.put('/notes/:entryId', requireAuth, async (req, res) => {
   await db.query(
     `INSERT INTO notes (entry_id, user_id, content, updated_at) VALUES ($1, $2, $3, $4)
      ON CONFLICT (entry_id, user_id) DO UPDATE SET content = $3, updated_at = $4`,
-    [req.params.entryId, req.session.user.id, content || '', now]
+    [req.params.entryId, req.auth.id, content || '', now]
   );
   res.json({ ok: true, updated_at: now });
 });
@@ -102,7 +111,7 @@ router.post('/import', requireAuth, requireAdmin, async (req, res) => {
            e.sub || e.subheading || '', e.content || '',
            JSON.stringify(e.links || []), JSON.stringify(e.tags || []),
            e.createdAt || e.created_at || now, e.updatedAt || e.updated_at || now,
-           req.session.user.username]
+           req.auth.username]
         );
         imported++;
       } catch (err) { skipped++; }
@@ -151,7 +160,7 @@ router.get('/export', requireAuth, async (req, res) => {
     types: sMap.types || [],
     entries: entries.rows,
     exportedAt: new Date().toISOString(),
-    exportedBy: req.session.user.username
+    exportedBy: req.auth.username
   };
   res.setHeader('Content-Disposition', `attachment; filename=ca_kb_export_${new Date().toISOString().slice(0,10)}.json`);
   res.json(result);
