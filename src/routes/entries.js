@@ -1,5 +1,5 @@
 const express = require('express');
-const DOMPurify = require('isomorphic-dompurify');
+const sanitizeHtml = require('sanitize-html');
 const db = require('../db/pool');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
@@ -12,16 +12,25 @@ const router = express.Router();
 // allowed — cross-ref chips use `data-ref-id` (an inert attribute) and the
 // frontend attaches its click behavior via event delegation instead of an
 // inline onclick string, so there's nothing here for pasted markup to hijack.
+//
+// Uses sanitize-html rather than DOMPurify/jsdom: jsdom's dependency chain
+// (html-encoding-sniffer -> @exodus/bytes) is ESM-only and crashes under
+// CommonJS on Node 18 (confirmed live — crashed this exact service in
+// production). sanitize-html has no jsdom dependency and is built for
+// server-side use without a DOM.
 const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'strong', 'em', 'p', 'br', 'ul', 'ol', 'li',
   'table', 'tr', 'td', 'th', 'thead', 'tbody', 'h3', 'h4', 'span', 'a'];
-const ALLOWED_ATTR = ['class', 'href', 'data-ref-id'];
+const ALLOWED_ATTR = {
+  '*': ['class', 'data-ref-id'],
+  a: ['href'],
+};
 
 function sanitizeEntryHtml(html) {
   if (!html) return '';
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    ALLOW_DATA_ATTR: false,
+  return sanitizeHtml(html, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: ALLOWED_ATTR,
+    allowedSchemes: ['http', 'https', 'mailto'],
   });
 }
 
