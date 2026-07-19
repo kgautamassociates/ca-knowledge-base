@@ -19,17 +19,15 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
 button,select,input,textarea{font-family:inherit}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
 /* ═══ LOGIN ═══ */
 .loginPage{position:fixed;inset:0;background:linear-gradient(135deg,#1b2030,#2a3150,#1b2030);display:flex;align-items:center;justify-content:center;z-index:500}
 .loginBox{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:36px 40px;width:380px;text-align:center}
 .loginBox h1{font-family:'Crimson Pro',serif;font-size:22px;color:var(--accentL);margin-bottom:4px}
 .loginBox .firm{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:24px}
-.loginBox input{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);border-radius:var(--r);color:#fff;font-size:13px;outline:none;margin-bottom:10px}
-.loginBox input:focus{border-color:var(--accent)}
-.loginBox input::placeholder{color:rgba(255,255,255,.3)}
 .loginBox button{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
-.loginBox .err{color:#f87171;font-size:12px;min-height:18px;margin-top:8px}
 
 /* ═══ APP LAYOUT ═══ */
 .app{display:none;height:100vh;flex-direction:column}
@@ -39,7 +37,7 @@ button,select,input,textarea{font-family:inherit}
 .side{width:300px;min-width:300px;background:var(--side);display:flex;flex-direction:column;overflow:hidden;transition:width .3s,min-width .3s}
 .side.collapsed{width:0;min-width:0}
 .sHead{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.06)}
-.sHead h1{font-family:'Crimson Pro',serif;font-size:16px;color:var(--accentL);font-weight:700}
+.sHead .sBrand{font-family:'Crimson Pro',serif;font-size:16px;color:var(--accentL);font-weight:700}
 .sHead p{font-size:10px;color:var(--textSide);margin-top:2px;opacity:.6}
 .sSearch{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.05);position:relative}
 .sSearch input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:8px 10px 8px 28px;color:#fff;font-size:12px;outline:none}
@@ -86,7 +84,7 @@ button,select,input,textarea{font-family:inherit}
 .srd{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadowL);max-height:380px;overflow-y:auto;z-index:100;display:none}
 .srd.vis{display:block}
 .sri{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s}
-.sri:hover{background:var(--accentBg)}
+.sri:hover,.sri.sriActive{background:var(--accentBg)}
 .sri .st{font-size:12px;font-weight:600}.sri .sp{font-size:10.5px;color:var(--text2);margin-top:1px}
 .stag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;color:#fff;margin-right:4px;text-transform:uppercase;font-weight:700}
 .content{flex:1;overflow-y:auto;padding:24px 36px}
@@ -94,7 +92,7 @@ button,select,input,textarea{font-family:inherit}
 
 /* ═══ HOME ═══ */
 .welcome{max-width:900px;margin:0 auto}
-.welcome h2{font-family:'Crimson Pro',serif;font-size:28px;text-align:center;margin-bottom:4px}
+.welcome h1{font-family:'Crimson Pro',serif;font-size:28px;font-weight:700;text-align:center;margin-bottom:4px}
 .welcome .firm{text-align:center;color:var(--accent);font-weight:600;font-size:14px;margin-bottom:18px}
 .qStats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
 .qStat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
@@ -225,6 +223,30 @@ button,select,input,textarea{font-family:inherit}
 .toast{position:fixed;bottom:16px;right:16px;background:#1b2030;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:12px;z-index:300;transform:translateY(60px);opacity:0;transition:.3s;box-shadow:var(--shadowL)}
 .toast.vis{transform:translateY(0);opacity:1}
 
+/* ═══ RESPONSIVE (mobile/tablet) ═══ */
+@media (max-width:768px){
+  /* Sidebar becomes an off-canvas overlay instead of pushing content —
+     collapsed is the default state; .side.mobileOpen renders it as a
+     fixed-position drawer over the content instead of a squeezed column. */
+  .side{position:fixed;top:0;left:0;bottom:0;z-index:150;width:280px;min-width:280px;transform:translateX(-100%);transition:transform .25s;box-shadow:var(--shadowL)}
+  .side.collapsed{width:280px;min-width:280px;transform:translateX(-100%)}
+  .side.mobileOpen{transform:translateX(0)}
+  .sideBackdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:140}
+  .sideBackdrop.vis{display:block}
+
+  /* Entry body + notes panel stack vertically instead of side-by-side */
+  .evSplit{flex-direction:column}
+  .evNotesCol{width:100%;min-width:0}
+
+  /* Dense tables scroll horizontally within their own container instead of
+     forcing the whole page to scroll sideways */
+  .idxTableWrap{overflow-x:auto}
+  .qStats{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}
+
+  .content{padding:16px}
+  .gSearch{width:auto;flex:1}
+}
+
 /* ═══ PRINT ═══ */
 @media print{
   .side,.topbar,.evBar,.modal-bg,.graphOverlay,.toast,.sFoot,.sSearch,.togSide,.gSearch,.bc,.backupBar{display:none!important}
@@ -235,6 +257,7 @@ button,select,input,textarea{font-family:inherit}
   body{height:auto!important;overflow:auto!important}
 }
 </style>
+<script src="/vendor/dompurify.min.js"></script>
 </head>
 <body>
 
@@ -258,34 +281,37 @@ button,select,input,textarea{font-family:inherit}
   </div>
   <div class="appInner">
     <!-- SIDEBAR -->
-    <div class="side" id="sidebar">
+    <div class="sideBackdrop" id="sideBackdrop" onclick="closeMobileSidebar()"></div>
+    <nav class="side" id="sidebar" aria-label="Entry browser">
       <div class="sHead">
-        <h1>⚖ CA Knowledge Base</h1>
+        <p class="sBrand">⚖ CA Knowledge Base</p>
         <p>Kanhaiya Gautam & Associates</p>
         <div id="userInfo" style="margin-top:6px"></div>
       </div>
-      <div class="sSearch"><input type="text" id="sideFilter" placeholder="Filter entries… (Ctrl+K)" oninput="debounceSidebar()"></div>
-      <div class="sBody" id="sideBody"></div>
+      <div class="sSearch"><label for="sideFilter" class="sr-only">Filter entries</label><input type="text" id="sideFilter" placeholder="Filter entries… (Ctrl+K)" oninput="debounceSidebar()"></div>
+      <div class="sBody" id="sideBody" aria-live="polite"></div>
       <div class="sFoot">
         <button onclick="doExport()">⬇ Export</button>
         <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
-        <button onclick="openSettings()">⚙</button>
+        <button onclick="openSettings()" aria-label="Settings">⚙</button>
         <button class="pri" onclick="openNewModal()" id="btnNew" style="display:none">+ New</button>
         <button onclick="doLogout()">🔒 Logout</button>
       </div>
-    </div>
+    </nav>
     <!-- MAIN -->
     <div class="main">
       <div class="topbar">
-        <button class="togSide" onclick="document.getElementById('sidebar').classList.toggle('collapsed')" title="Toggle sidebar">☰</button>
-        <div class="bc" id="bc"><span onclick="showHome()">Home</span></div>
+        <button class="togSide" onclick="toggleSidebar()" aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
+        <div class="bc" id="bc"><span role="button" tabindex="0" onclick="showHome()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showHome()}">Home</span></div>
         <button class="graphBtn" onclick="openGraph()" title="Knowledge Graph (Ctrl+G)">⬡ Graph</button>
         <div class="gSearch">
-          <input type="text" id="globalSearch" placeholder="Search everything… (Ctrl+/)">
-          <div class="srd" id="srd"></div>
+          <label for="globalSearch" class="sr-only">Search everything</label>
+          <input type="text" id="globalSearch" placeholder="Search everything… (Ctrl+/)" role="combobox" aria-expanded="false" aria-controls="srd" autocomplete="off">
+          <div class="srd" id="srd" role="listbox" aria-label="Search results"></div>
+          <div class="sr-only" id="srStatus" role="status" aria-live="polite"></div>
         </div>
       </div>
-      <div class="content" id="content"></div>
+      <main class="content" id="content" role="main"></main>
     </div>
   </div>
 </div>
@@ -339,9 +365,9 @@ button,select,input,textarea{font-family:inherit}
 </div>
 
 <!-- ENTRY MODAL -->
-<div class="modal-bg" id="entryModal">
-  <div class="modal" style="width:720px">
-    <div class="modal-hd"><h3 id="emTitle">New Entry</h3><button class="mClose" onclick="closeEntryModal()">✕</button></div>
+<div class="modal-bg" id="entryModal" onclick="if(event.target===this)closeEntryModal()">
+  <div class="modal" style="width:720px" role="dialog" aria-modal="true" aria-labelledby="emTitle">
+    <div class="modal-hd"><h3 id="emTitle">New Entry</h3><button class="mClose" onclick="closeEntryModal()" aria-label="Close">✕</button></div>
     <div class="modal-bd">
       <div class="fRow">
         <div class="fg"><label>Act / Law</label><select id="fAct"></select></div>
@@ -411,9 +437,9 @@ button,select,input,textarea{font-family:inherit}
 </div>
 
 <!-- SETTINGS MODAL -->
-<div class="modal-bg" id="settingsModal">
-  <div class="modal" style="width:600px">
-    <div class="modal-hd"><h3>⚙ Settings</h3><button class="mClose" onclick="closeSettings()">✕</button></div>
+<div class="modal-bg" id="settingsModal" onclick="if(event.target===this)closeSettings()">
+  <div class="modal" style="width:600px" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-hd"><h3 id="settingsTitle">⚙ Settings</h3><button class="mClose" onclick="closeSettings()" aria-label="Close">✕</button></div>
     <div class="modal-bd" id="settingsBody"></div>
     <div class="modal-ft"><button onclick="closeSettings()">Close</button></div>
   </div>
@@ -426,6 +452,23 @@ button,select,input,textarea{font-family:inherit}
 // ─── GLOBALS ───
 let USER = null, SETTINGS = { acts: [], types: [] };
 let curId = null, editId = null, modalDirty = false;
+
+// Entry/notes content is authored via contenteditable + execCommand and
+// rendered back via innerHTML — sanitize on every render as a second layer
+// (the server already sanitizes on write) since the DB may hold content
+// saved before this fix shipped. Mirrors the server allowlist in
+// src/routes/entries.js's sanitizeEntryHtml — no on* handlers are ever
+// allowed; cross-ref chips use data-ref-id + event delegation instead.
+function sanitizeHtml(html) {
+  if (!html) return '';
+  if (typeof DOMPurify === 'undefined') return ''; // fail closed, not open
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['b','i','u','s','strong','em','p','br','ul','ol','li',
+      'table','tr','td','th','thead','tbody','h3','h4','span','a'],
+    ALLOWED_ATTR: ['class','href','data-ref-id'],
+    ALLOW_DATA_ATTR: false,
+  });
+}
 
 const TYPE_COLORS = {
   section:'#2563eb', rule:'#7c3aed', notification:'#dc2626', circular:'#8b5cf6',
@@ -458,9 +501,23 @@ let SESSION_TOKEN=null;
 async function api(url,opts={}){
   const headers={'Content-Type':'application/json',...(opts.headers||{})};
   if(SESSION_TOKEN)headers['Authorization']='Bearer '+SESSION_TOKEN;
-  const r=await fetch(url,{...opts,headers,body:opts.body?JSON.stringify(opts.body):undefined});
+  let r;
+  try{
+    r=await fetch(url,{...opts,headers,body:opts.body?JSON.stringify(opts.body):undefined});
+  }catch(networkErr){
+    // Offline/DNS/CORS failures throw rather than resolving with a status —
+    // without this catch, callers see an unhandled rejection and the UI
+    // silently freezes with no feedback.
+    toast('Network error — check your connection and try again');
+    return{error:'network'};
+  }
   if(r.status===401){showLogin();return{error:'Not authenticated'}}
-  return r.json();
+  if(r.status===403)return{error:'forbidden'};
+  try{
+    return await r.json();
+  }catch(parseErr){
+    return{error:'network'};
+  }
 }
 
 // ─── AUTH ───
@@ -529,12 +586,12 @@ async function loadSidebar(){
   for(const[an,chs]of Object.entries(acts)){
     const tot=Object.values(chs).reduce((s,a)=>s+a.length,0);
     const isOpen=!!(filter||Object.values(chs).some(items=>items.some(e=>e.id===curId)));
-    h+=`<div class="actGrp"><div class="actH${isOpen?' open':''}" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span class="arr">▶</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${an}</span><span class="cnt">${tot}</span></div><div class="actItems${isOpen?' open':''}">`;
+    h+=`<div class="actGrp"><div class="actH${isOpen?' open':''}" role="button" tabindex="0" aria-expanded="${isOpen}" onclick="this.classList.toggle('open');this.setAttribute('aria-expanded',this.classList.contains('open'));this.nextElementSibling.classList.toggle('open')"><span class="arr">▶</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${an}</span><span class="cnt">${tot}</span></div><div class="actItems${isOpen?' open':''}">`;
     for(const[ch,items]of Object.entries(chs)){
       if(Object.keys(chs).length>1)h+=`<div class="chapHead">${ch}</div>`;
       items.forEach(e=>{
         const ac=e.id===curId?' active':'';
-        h+=`<div class="sItem${ac}" onclick="goTo('${e.id}')" title="${(e.sub||'').replace(/"/g,'&quot;')}"><span class="sDot" style="background:${tColor(e.type)}"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tLabel(e.type)} ${e.number} — ${(e.title||'').substring(0,36)}</span></div>`;
+        h+=`<div class="sItem${ac}" role="button" tabindex="0" onclick="goTo('${e.id}')" title="${(e.sub||'').replace(/"/g,'&quot;')}"><span class="sDot" style="background:${tColor(e.type)}"></span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${tLabel(e.type)} ${e.number} — ${(e.title||'').substring(0,36)}</span></div>`;
       });
     }
     h+=`</div></div>`;
@@ -544,23 +601,56 @@ async function loadSidebar(){
 
 // ─── NAVIGATION ───
 async function goTo(id){
+  closeMobileSidebar();
   const e=await api('/api/entries/'+id);
-  if(e.error){toast('Entry not found');return}
-  curId=id;renderEntry(e);loadSidebar();
+  if(e.error){
+    toast(e.error==='forbidden'?"You're not a member of KGA Staff":e.error==='network'?'Network error — check your connection and try again':'Entry not found');
+    return;
+  }
+  curId=id;await renderEntry(e);loadSidebar();
+  const content=document.getElementById('content');
+  content.setAttribute('tabindex','-1');
+  content.focus();
 }
-window.goTo=goTo; // expose for cross-ref onclick in content
+
+// Cross-ref chips (.linkChip, .cross-ref) carry a data-ref-id attribute
+// instead of an inline onclick string — sanitized/pasted content can never
+// carry a live onclick handler, so navigation is wired here via delegation
+// against the id data alone.
+document.addEventListener('click',ev=>{
+  const chip=ev.target.closest('[data-ref-id]');
+  if(chip)goTo(chip.getAttribute('data-ref-id'));
+});
+// Every other interactive row/chip in the sidebar, breadcrumb, and home
+// index table keeps its existing onclick (they're plain, controlled
+// values — act names, entry ids from our own API — never pasted content),
+// but is marked role="button" tabindex="0" for keyboard reach. This one
+// delegated handler makes Enter/Space activate any of them by replaying a
+// synthetic click, so each call site doesn't need its own keydown wiring.
+document.addEventListener('keydown',ev=>{
+  if(ev.key!=='Enter'&&ev.key!==' ')return;
+  const chip=ev.target.closest('[data-ref-id]');
+  if(chip){ev.preventDefault();goTo(chip.getAttribute('data-ref-id'));return}
+  const btn=ev.target.closest('[role="button"]');
+  if(btn&&document.activeElement===btn){ev.preventDefault();btn.click()}
+});
 
 async function renderEntry(e){
   const actEsc=e.act.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-  document.getElementById('bc').innerHTML=`<span onclick="showHome()">Home</span><span class="sep">›</span><span onclick="filterByAct('${actEsc}')">${e.act}</span><span class="sep">›</span><span>${tLabel(e.type)} ${e.number}</span>`;
+  document.getElementById('bc').innerHTML=`<span role="button" tabindex="0" onclick="showHome()">Home</span><span class="sep">›</span><span role="button" tabindex="0" onclick="filterByAct('${actEsc}')">${e.act}</span><span class="sep">›</span><span>${tLabel(e.type)} ${e.number}</span>`;
 
-  // Cross-reference chips
+  // Cross-reference chips — fetched in parallel rather than one awaited
+  // request per link, so an entry with many cross-references doesn't pay
+  // N sequential network round-trips before rendering.
+  const linkResults = await Promise.all(
+    (e.links||[]).map(lid => api('/api/entries/'+lid).catch(()=>null))
+  );
   let outH='';
-  for(const lid of (e.links||[])){
-    const le=await api('/api/entries/'+lid).catch(()=>null);
-    if(le&&!le.error) outH+=`<span class="linkChip" onclick="goTo('${lid}')"><span class="sDot" style="background:${tColor(le.type)};width:6px;height:6px;border-radius:50%"></span>${tLabel(le.type)} ${le.number} — ${(le.title||'').substring(0,30)}</span>`;
+  (e.links||[]).forEach((lid, i) => {
+    const le = linkResults[i];
+    if(le&&!le.error) outH+=`<span class="linkChip" role="button" tabindex="0" data-ref-id="${lid}"><span class="sDot" style="background:${tColor(le.type)};width:6px;height:6px;border-radius:50%"></span>${tLabel(le.type)} ${le.number} — ${(le.title||'').substring(0,30)}</span>`;
     else outH+=`<span class="linkChip">${lid}</span>`;
-  }
+  });
 
   const isAdmin=USER&&USER.role==='admin';
   const adminBtns=isAdmin?`
@@ -587,7 +677,7 @@ async function renderEntry(e){
     </div>
     <div class="evSplit">
       <div class="evMainCol">
-        <div class="evBody">${e.content||'<em style="color:#aaa">No content yet.</em>'}</div>
+        <div class="evBody">${e.content?sanitizeHtml(e.content):'<em style="color:#aaa">No content yet.</em>'}</div>
       </div>
       <div class="evNotesCol" id="notesCol">
         <div class="notesPanel">
@@ -629,7 +719,7 @@ async function renderEntry(e){
 async function loadNotes(entryId){
   const r=await api('/api/notes/'+entryId);
   const ed=document.getElementById('notesEditor');if(!ed)return;
-  ed.innerHTML=r.content||'';
+  ed.innerHTML=r.content?sanitizeHtml(r.content):'';
   const badge=document.getElementById('notesBadge');
   if(badge)badge.classList.toggle('has',!!r.content);
   if(r.updated_at)document.getElementById('notesSaved').textContent='Saved '+fmtDate(r.updated_at);
@@ -660,10 +750,10 @@ function toggleNotesPanel(){
 // ─── HOME ───
 async function showHome(){
   curId=null;
-  document.getElementById('bc').innerHTML='<span onclick="showHome()">Home</span>';
+  document.getElementById('bc').innerHTML='<span role="button" tabindex="0" onclick="showHome()">Home</span>';
   loadSidebar();
   const [stats,entries]=await Promise.all([api('/api/stats'),api('/api/entries?limit=100')]);
-  const rows=entries.map(e=>`<tr onclick="goTo('${e.id}')">
+  const rows=entries.map(e=>`<tr role="button" tabindex="0" onclick="goTo('${e.id}')">
     <td style="font-size:11px">${e.act}</td>
     <td><span class="stag" style="background:${tColor(e.type)};font-size:8px;padding:1px 5px">${e.type}</span></td>
     <td style="font-weight:700">${e.number}</td>
@@ -672,7 +762,7 @@ async function showHome(){
     <td style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--text2)">${fmtDate(e.updated_at)}</td>
   </tr>`).join('');
   document.getElementById('content').innerHTML=`<div class="welcome">
-    <h2>⚖ CA Knowledge Base</h2>
+    <h1>⚖ CA Knowledge Base</h1>
     <div class="firm">Kanhaiya Gautam & Associates</div>
     <div class="qStats">
       <div class="qStat"><div class="n">${stats.total}</div><div class="l">Total Entries</div></div>
@@ -680,29 +770,68 @@ async function showHome(){
       <div class="qStat"><div class="n">${stats.types.find(t=>t.type==='section')?.count||0}</div><div class="l">Sections</div></div>
       <div class="qStat"><div class="n">${stats.types.find(t=>t.type==='caselaw')?.count||0}</div><div class="l">Case Laws</div></div>
     </div>
-    <h3 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:10px">Recent Entries <span style="font-weight:400;text-transform:none;font-size:10px;color:#999">(last updated first)</span></h3>
-    <table class="idxTable"><thead><tr><th>Act</th><th>Type</th><th>No.</th><th>Title</th><th>Index Line</th><th>Updated</th></tr></thead><tbody>${rows}</tbody></table>
+    <h2 style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:10px">Recent Entries <span style="font-weight:400;text-transform:none;font-size:10px;color:#999">(last updated first)</span></h2>
+    <div class="idxTableWrap"><table class="idxTable"><caption class="sr-only">Recent entries, most recently updated first</caption><thead><tr><th scope="col">Act</th><th scope="col">Type</th><th scope="col">No.</th><th scope="col">Title</th><th scope="col">Index Line</th><th scope="col">Updated</th></tr></thead><tbody>${rows}</tbody></table></div>
   </div>`;
 }
 
 // ─── SEARCH (live dropdown) ───
-let _searchTimer=null;
+let _searchTimer=null,_searchAbort=null;
 function setupSearch(){
   const inp=document.getElementById('globalSearch');
   const dd=document.getElementById('srd');
+  const status=document.getElementById('srStatus');
+  function closeDropdown(){
+    dd.classList.remove('vis');
+    inp.setAttribute('aria-expanded','false');
+    inp.removeAttribute('aria-activedescendant');
+  }
   inp.addEventListener('input',()=>{
     clearTimeout(_searchTimer);
+    if(_searchAbort)_searchAbort.abort();
     const q=inp.value.trim();
-    if(q.length<2){dd.classList.remove('vis');return}
+    if(q.length<2){closeDropdown();return}
     _searchTimer=setTimeout(async()=>{
+      _searchAbort=new AbortController();
+      const signal=_searchAbort.signal;
       const res=await api(`/api/entries?search=${encodeURIComponent(q)}&limit=15`);
+      if(signal.aborted)return;
       dd.innerHTML=res.length
-        ?res.map(e=>`<div class="sri" onclick="goTo('${e.id}');dd.classList.remove('vis');inp.value=''"><span class="stag" style="background:${tColor(e.type)}">${tLabel(e.type)}</span><span class="st">${e.number} — ${e.title}</span><div class="sp">${e.act}${e.chapter?' › '+e.chapter:''}</div></div>`).join('')
+        ?res.map((e,i)=>`<div class="sri" id="sri-${i}" role="option" tabindex="-1" data-ref-id="${e.id}" onclick="goTo('${e.id}');dd.classList.remove('vis');inp.value=''"><span class="stag" style="background:${tColor(e.type)}">${tLabel(e.type)}</span><span class="st">${e.number} — ${e.title}</span><div class="sp">${e.act}${e.chapter?' › '+e.chapter:''}</div></div>`).join('')
         :'<div style="padding:12px;color:#999;font-size:12px">No results</div>';
       dd.classList.add('vis');
+      inp.setAttribute('aria-expanded','true');
+      status.textContent=res.length?`${res.length} result${res.length!==1?'s':''} found`:'No results found';
     },250);
   });
-  inp.addEventListener('blur',()=>setTimeout(()=>dd.classList.remove('vis'),200));
+  inp.addEventListener('keydown',ev=>{
+    if(!dd.classList.contains('vis'))return;
+    const opts=Array.from(dd.querySelectorAll('.sri'));
+    if(!opts.length)return;
+    const curIdx=opts.findIndex(o=>o.id===inp.getAttribute('aria-activedescendant'));
+    if(ev.key==='ArrowDown'){
+      ev.preventDefault();
+      const next=opts[Math.min(curIdx+1,opts.length-1)];
+      inp.setAttribute('aria-activedescendant',next.id);
+      opts.forEach(o=>o.classList.remove('sriActive'));
+      next.classList.add('sriActive');
+      next.scrollIntoView({block:'nearest'});
+    }else if(ev.key==='ArrowUp'){
+      ev.preventDefault();
+      const prev=opts[Math.max(curIdx-1,0)];
+      inp.setAttribute('aria-activedescendant',prev.id);
+      opts.forEach(o=>o.classList.remove('sriActive'));
+      prev.classList.add('sriActive');
+      prev.scrollIntoView({block:'nearest'});
+    }else if(ev.key==='Enter'&&curIdx>=0){
+      ev.preventDefault();
+      goTo(opts[curIdx].getAttribute('data-ref-id'));
+      closeDropdown();inp.value='';
+    }else if(ev.key==='Escape'){
+      closeDropdown();
+    }
+  });
+  inp.addEventListener('blur',()=>setTimeout(closeDropdown,200));
 }
 function setupKeyboard(){
   document.addEventListener('keydown',ev=>{
@@ -714,9 +843,53 @@ function setupKeyboard(){
     else if(ev.key==='Escape'){
       if(document.getElementById('graphOverlay').classList.contains('vis')){closeGraph();return}
       if(document.getElementById('entryModal').classList.contains('vis')){closeEntryModal();return}
-      if(document.getElementById('settingsModal').classList.contains('vis')){closeSettings()}
+      if(document.getElementById('settingsModal').classList.contains('vis')){closeSettings();return}
+      if(document.getElementById('sidebar').classList.contains('mobileOpen')){closeMobileSidebar()}
     }
   });
+}
+
+// ─── MODAL FOCUS TRAP ───
+// Shared by #entryModal and #settingsModal: moves focus into the dialog on
+// open, cycles Tab/Shift+Tab within it, and returns focus to whatever
+// triggered it on close.
+let _modalTrapHandler=null,_modalReturnFocus=null;
+function trapModalFocus(modalId){
+  _modalReturnFocus=document.activeElement;
+  const modal=document.getElementById(modalId);
+  const dialog=modal.querySelector('[role="dialog"]');
+  const focusable=dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])');
+  focusable[0]?.focus();
+  _modalTrapHandler=ev=>{
+    if(ev.key!=='Tab'||!focusable.length)return;
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(ev.shiftKey&&document.activeElement===first){ev.preventDefault();last.focus()}
+    else if(!ev.shiftKey&&document.activeElement===last){ev.preventDefault();first.focus()}
+  };
+  document.addEventListener('keydown',_modalTrapHandler);
+}
+function releaseModalFocus(){
+  if(_modalTrapHandler)document.removeEventListener('keydown',_modalTrapHandler);
+  _modalTrapHandler=null;
+  _modalReturnFocus?.focus();
+  _modalReturnFocus=null;
+}
+
+// ─── SIDEBAR TOGGLE (desktop collapse vs. mobile off-canvas drawer) ───
+function toggleSidebar(){
+  const sidebar=document.getElementById('sidebar');
+  if(window.matchMedia('(max-width:768px)').matches){
+    const opening=!sidebar.classList.contains('mobileOpen');
+    sidebar.classList.toggle('mobileOpen',opening);
+    document.getElementById('sideBackdrop').classList.toggle('vis',opening);
+    if(opening)document.getElementById('sideFilter').focus();
+  }else{
+    sidebar.classList.toggle('collapsed');
+  }
+}
+function closeMobileSidebar(){
+  document.getElementById('sidebar').classList.remove('mobileOpen');
+  document.getElementById('sideBackdrop').classList.remove('vis');
 }
 
 // ─── RICH TEXT EDITOR ───
@@ -797,7 +970,9 @@ async function insertCrossRef(){
   const entry=entries.find(e=>e.id===id);
   const label=entry?`${tLabel(entry.type)} ${entry.number}`:id;
   document.getElementById('rteArea').focus();
-  document.execCommand('insertHTML',false,`<span class="cross-ref" onclick="goTo('${id}')">${label}</span> `);
+  const escAttr=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+  const escText=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  document.execCommand('insertHTML',false,`<span class="cross-ref" role="button" tabindex="0" data-ref-id="${escAttr(id)}">${escText(label)}</span> `);
 }
 function cleanContent(html){
   const tmp=document.createElement('div');tmp.innerHTML=html;
@@ -823,6 +998,7 @@ function openNewModal(){
   ['fChap','fNum','fTitle','fSub','fLinks','fTags'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
   document.getElementById('rteArea').innerHTML='';
   document.getElementById('entryModal').classList.add('vis');
+  trapModalFocus('entryModal');
 }
 async function openEditModal(id){
   editId=id;modalDirty=false;
@@ -834,10 +1010,11 @@ async function openEditModal(id){
   document.getElementById('fNum').value=e.number||'';
   document.getElementById('fTitle').value=e.title||'';
   document.getElementById('fSub').value=e.sub||'';
-  document.getElementById('rteArea').innerHTML=e.content||'';
+  document.getElementById('rteArea').innerHTML=e.content?sanitizeHtml(e.content):'';
   document.getElementById('fLinks').value=(e.links||[]).join(', ');
   document.getElementById('fTags').value=(e.tags||[]).join(', ');
   document.getElementById('entryModal').classList.add('vis');
+  trapModalFocus('entryModal');
 }
 function _populateDropdowns(e){
   document.getElementById('fAct').innerHTML=SETTINGS.acts.map(a=>`<option value="${a}"${e.act===a?' selected':''}>${a}</option>`).join('');
@@ -851,6 +1028,7 @@ function closeEntryModal(){
   const area=document.getElementById('rteArea');if(area)area.classList.remove('expanded');
   const bE=document.getElementById('btnExpand');if(bE)bE.textContent='↕ Expand';
   const bF=document.getElementById('btnFullscreen');if(bF)bF.textContent='⛶ Full';
+  releaseModalFocus();
 }
 // Dirty tracking
 document.addEventListener('input',ev=>{if(ev.target.closest('#entryModal'))modalDirty=true});
@@ -949,8 +1127,9 @@ async function openSettings(){
   document.getElementById('settingsBody').innerHTML=html;
   document.getElementById('settingsModal').classList.add('vis');
   if(isAdmin){renderActChips();renderTypeChips()}
+  trapModalFocus('settingsModal');
 }
-function closeSettings(){document.getElementById('settingsModal').classList.remove('vis')}
+function closeSettings(){document.getElementById('settingsModal').classList.remove('vis');releaseModalFocus()}
 
 function renderActChips(){
   const el=document.getElementById('actChips');if(!el)return;
