@@ -1,4 +1,5 @@
 const express = require('express');
+const helmet = require('helmet');
 const { clerkMiddleware } = require('@clerk/express');
 const path = require('path');
 const db = require('./db/pool');
@@ -10,6 +11,24 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ═══ MIDDLEWARE ═══
+// Defense-in-depth alongside the entry/notes sanitization in routes/entries.js:
+// even if a future change reintroduces unsanitized HTML, a restrictive
+// script-src means an injected <script>/event-handler still can't execute.
+// style-src/font-src stay relaxed since the whole page is one inline <style>
+// block plus a Google Fonts @import — tightening those isn't this fix's scope.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname, '..', 'public')));

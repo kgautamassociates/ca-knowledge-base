@@ -1,8 +1,29 @@
 const express = require('express');
+const DOMPurify = require('isomorphic-dompurify');
 const db = require('../db/pool');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Entry content is authored via a contenteditable rich-text editor and
+// rendered back out via innerHTML for every viewer — sanitize on write so
+// stored data can never carry a script/event-handler payload regardless of
+// what any future client sends. No `on*` handler attributes are ever
+// allowed — cross-ref chips use `data-ref-id` (an inert attribute) and the
+// frontend attaches its click behavior via event delegation instead of an
+// inline onclick string, so there's nothing here for pasted markup to hijack.
+const ALLOWED_TAGS = ['b', 'i', 'u', 's', 'strong', 'em', 'p', 'br', 'ul', 'ol', 'li',
+  'table', 'tr', 'td', 'th', 'thead', 'tbody', 'h3', 'h4', 'span', 'a'];
+const ALLOWED_ATTR = ['class', 'href', 'data-ref-id'];
+
+function sanitizeEntryHtml(html) {
+  if (!html) return '';
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS,
+    ALLOWED_ATTR,
+    ALLOW_DATA_ATTR: false,
+  });
+}
 
 // List / Search entries
 router.get('/', requireAuth, async (req, res) => {
@@ -36,9 +57,13 @@ router.get('/', requireAuth, async (req, res) => {
 
 // Get single entry
 router.get('/:id', requireAuth, async (req, res) => {
-  const result = await db.query('SELECT * FROM entries WHERE id = $1', [req.params.id]);
-  if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
-  res.json(result.rows[0]);
+  try {
+    const result = await db.query('SELECT * FROM entries WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Create entry (admin)
@@ -49,12 +74,13 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
     const entryId = id || generateId(act, type, number);
     const now = new Date().toISOString();
+    const safeContent = sanitizeEntryHtml(content);
 
     await db.query(
       `INSERT INTO entries (id, act, type, chapter, number, title, sub, content, links, tags, created_at, updated_at, created_by)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
       [entryId, act, type || 'section', chapter || '', number, title, sub || '',
-       content || '', JSON.stringify(links || []), JSON.stringify(tags || []),
+       safeContent, JSON.stringify(links || []), JSON.stringify(tags || []),
        now, now, req.auth.username]
     );
     res.json({ id: entryId, ok: true });
@@ -68,7 +94,7 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
           `INSERT INTO entries (id, act, type, chapter, number, title, sub, content, links, tags, created_at, updated_at, created_by)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
           [altId, req.body.act, req.body.type || 'section', req.body.chapter || '', req.body.number,
-           req.body.title, req.body.sub || '', req.body.content || '',
+           req.body.title, req.body.sub || '', sanitizeEntryHtml(req.body.content),
            JSON.stringify(req.body.links || []), JSON.stringify(req.body.tags || []),
            now, now, req.auth.username]
         );
@@ -84,21 +110,29 @@ router.post('/', requireAuth, requireAdmin, async (req, res) => {
 
 // Update entry (admin)
 router.put('/:id', requireAuth, requireAdmin, async (req, res) => {
-  const { act, type, chapter, number, title, sub, content, links, tags } = req.body;
-  const now = new Date().toISOString();
-  await db.query(
-    `UPDATE entries SET act=$1, type=$2, chapter=$3, number=$4, title=$5, sub=$6,
-     content=$7, links=$8, tags=$9, updated_at=$10 WHERE id=$11`,
-    [act, type, chapter || '', number, title, sub || '', content || '',
-     JSON.stringify(links || []), JSON.stringify(tags || []), now, req.params.id]
-  );
-  res.json({ ok: true });
+  try {
+    const { act, type, chapter, number, title, sub, content, links, tags } = req.body;
+    const now = new Date().toISOString();
+    await db.query(
+      `UPDATE entries SET act=$1, type=$2, chapter=$3, number=$4, title=$5, sub=$6,
+       content=$7, links=$8, tags=$9, updated_at=$10 WHERE id=$11`,
+      [act, type, chapter || '', number, title, sub || '', sanitizeEntryHtml(content),
+       JSON.stringify(links || []), JSON.stringify(tags || []), now, req.params.id]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 // Delete entry (admin)
 router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
-  await db.query('DELETE FROM entries WHERE id = $1', [req.params.id]);
-  res.json({ ok: true });
+  try {
+    await db.query('DELETE FROM entries WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 function generateId(act, type, number) {
@@ -108,4 +142,10 @@ function generateId(act, type, number) {
   return `${prefix}-${t}${n}`;
 }
 
+// Attached to the router itself (not a plain `module.exports.foo =`) since
+// this file's final export is `module.exports = router` — a second,
+// separate assignment to module.exports would have silently overwritten
+// the first and left data.js's `require('./entries').sanitizeEntryHtml`
+// undefined at runtime. Caught by actually running the app, not by review.
+router.sanitizeEntryHtml = sanitizeEntryHtml;
 module.exports = router;

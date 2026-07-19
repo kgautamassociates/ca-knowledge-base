@@ -1,6 +1,7 @@
 const express = require('express');
 const db = require('../db/pool');
 const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { sanitizeEntryHtml } = require('./entries');
 
 const router = express.Router();
 
@@ -15,23 +16,31 @@ router.get('/me', requireAuth, (req, res) => {
 
 // ═══ NOTES ═══
 router.get('/notes/:entryId', requireAuth, async (req, res) => {
-  const result = await db.query(
-    'SELECT content, updated_at FROM notes WHERE entry_id = $1 AND user_id = $2',
-    [req.params.entryId, req.auth.id]
-  );
-  if (result.rows.length === 0) return res.json({ content: '', updated_at: null });
-  res.json(result.rows[0]);
+  try {
+    const result = await db.query(
+      'SELECT content, updated_at FROM notes WHERE entry_id = $1 AND user_id = $2',
+      [req.params.entryId, req.auth.id]
+    );
+    if (result.rows.length === 0) return res.json({ content: '', updated_at: null });
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 router.put('/notes/:entryId', requireAuth, async (req, res) => {
-  const { content } = req.body;
-  const now = new Date().toISOString();
-  await db.query(
-    `INSERT INTO notes (entry_id, user_id, content, updated_at) VALUES ($1, $2, $3, $4)
-     ON CONFLICT (entry_id, user_id) DO UPDATE SET content = $3, updated_at = $4`,
-    [req.params.entryId, req.auth.id, content || '', now]
-  );
-  res.json({ ok: true, updated_at: now });
+  try {
+    const { content } = req.body;
+    const now = new Date().toISOString();
+    await db.query(
+      `INSERT INTO notes (entry_id, user_id, content, updated_at) VALUES ($1, $2, $3, $4)
+       ON CONFLICT (entry_id, user_id) DO UPDATE SET content = $3, updated_at = $4`,
+      [req.params.entryId, req.auth.id, sanitizeEntryHtml(content), now]
+    );
+    res.json({ ok: true, updated_at: now });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ═══ SETTINGS ═══
